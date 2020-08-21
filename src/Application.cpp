@@ -15,7 +15,6 @@
 static void GLClearError() 
 {
 	while (glGetError() != GL_NO_ERROR);
-	
 }
 
 static void GLCheckError()
@@ -123,6 +122,9 @@ int main(void)
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
+	//glfwSwapInterval(1);   //make the refresh rate = refresh rate of the monitor OR sync with a V sync in my case this is a default 
+
+
 	if (glewInit() != GLEW_OK) {
 		std::cout << "Error" << std::endl;
 	}
@@ -157,8 +159,14 @@ int main(void)
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 	
 	unsigned int shader = CreateShader(source.VertexSource,source.FragmentSource);
-	glUseProgram(shader);
+	GLCall(glUseProgram(shader)); 
 
+	GLCall(int location = glGetUniformLocation(shader, "u_Color")); 
+	ASSERT(location != -1); //-1 means couldn't find the uniform u_Color
+	
+
+	float r = 0.0f;
+	float increment = 0.05f;
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{	//we are doing this every frame
@@ -166,9 +174,19 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 		//code down
 
-		
+		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
 		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,nullptr));
 		
+		if (r > 1.0f)
+		{
+			increment = -0.05f;
+		}
+		else if (r < 0.0f)
+		{
+			increment = 0.05f;
+		}
+		r += increment;
+
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
