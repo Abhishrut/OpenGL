@@ -1,2 +1,4 @@
 ﻿  Application.cpp
+c:\desktop\dev\opengl\opengl\opengl\src\application.cpp(173): warning C4002: too many arguments for function-like macro invocation 'GLCall'
+c:\desktop\dev\opengl\opengl\opengl\src\application.cpp(190): warning C4002: too many arguments for function-like macro invocation 'GLCall'
   OpenGL.vcxproj -> c:\Desktop\Dev\OpenGL\OpenGL\Debug\OpenGL.exe

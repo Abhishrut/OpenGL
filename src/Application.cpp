@@ -111,7 +111,10 @@ int main(void)
 	if (!glfwInit())
 		return -1;
 
-	
+	/*Changing OpenGL mode from compatiblility to Core Mode*/
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4); //version Major.minor version 3.3 //not working for me :(
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
 	if (!window)
@@ -141,14 +144,17 @@ int main(void)
 		0,1,2,
 		0,2,3
 	};
-	
+	unsigned int vao;
+	GLCall(glGenVertexArrays(1,&vao));
+	GLCall(glBindVertexArray(vao));
+
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer); 
-	glBufferData(GL_ARRAY_BUFFER, 6* 2 * sizeof(float),positions,GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-	glEnableVertexAttribArray(0);
+	GLCall(glEnableVertexAttribArray(0));
+	GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
 	unsigned int ibo;
 	glGenBuffers(1, &ibo);
@@ -157,13 +163,17 @@ int main(void)
 
 
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
-	
-	unsigned int shader = CreateShader(source.VertexSource,source.FragmentSource);
-	GLCall(glUseProgram(shader)); 
 
-	GLCall(int location = glGetUniformLocation(shader, "u_Color")); 
+	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
+	GLCall(glUseProgram(shader));
+
+	GLCall(int location = glGetUniformLocation(shader, "u_Color"));
 	ASSERT(location != -1); //-1 means couldn't find the uniform u_Color
 	
+	GLCall(glBindVertexArray, 0);
+	GLCall(glUseProgram(0));
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	float r = 0.0f;
 	float increment = 0.05f;
@@ -174,9 +184,13 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 		//code down
 
-		glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
-		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,nullptr));
-		
+		GLCall(glUseProgram(shader));
+		GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+		glBindBuffer(GL_ARRAY_BUFFER, buffer);
+		GLCall(glBindVertexArray, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 		if (r > 1.0f)
 		{
 			increment = -0.05f;
@@ -195,7 +209,7 @@ int main(void)
 	}
 
 	//glDeleteProgram(shader);
-	
+
 	glfwTerminate();
 	return 0;
 }
