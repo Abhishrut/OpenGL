@@ -6,34 +6,10 @@
 #include<string>
 #include<sstream>
 
-#define ASSERT(x) if(!(x)) __debugbreak();
-#define GLCall(x) GLClearError();\
-	x;\
-	ASSERT(GLLogCall(#x,__FILE__,__LINE__))
+#include"Renderer.h"
 
-
-static void GLClearError() 
-{
-	while (glGetError() != GL_NO_ERROR);
-}
-
-static void GLCheckError()
-{
-	while (GLenum error = glGetError())
-	{
-		std::cout << "[OpenGL Error] (" << error << ")" << std::endl;
-	}
-}
-
-static bool GLLogCall(const char* function, const char* file, int line)
-{
-	while (GLenum error = glGetError())
-	{
-		std::cout << "[OpenGL Error] (" << error << "):" << function << " " << file << ":" << line << std::endl;
-		return false;
-	}
-	return true;
-}
+#include"VertexBuffer.h"
+#include"IndexBuffer.h"
 
 struct ShaderProgramSource {
 	std::string VertexSource;
@@ -105,6 +81,7 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
 }
 int main(void)
 {
+	{
 	GLFWwindow* window;
 
 	/* Initialize the library */
@@ -145,22 +122,15 @@ int main(void)
 		0,2,3
 	};
 	unsigned int vao;
-	GLCall(glGenVertexArrays(1,&vao));
+	GLCall(glGenVertexArrays(1, &vao));
 	GLCall(glBindVertexArray(vao));
 
-	unsigned int buffer;
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+	VertexBuffer vb(positions, 4 * 2 * sizeof(float));
 
 	GLCall(glEnableVertexAttribArray(0));
 	GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
-	unsigned int ibo;
-	glGenBuffers(1, &ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
+	IndexBuffer ib(indices, 6);
 
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 
@@ -169,8 +139,8 @@ int main(void)
 
 	GLCall(int location = glGetUniformLocation(shader, "u_Color"));
 	ASSERT(location != -1); //-1 means couldn't find the uniform u_Color
-	
-	GLCall(glBindVertexArray, 0);
+
+	GLCall(glBindVertexArray(0));
 	GLCall(glUseProgram(0));
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -186,9 +156,8 @@ int main(void)
 
 		GLCall(glUseProgram(shader));
 		GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
-		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		GLCall(glBindVertexArray, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		GLCall(glBindVertexArray(vao));
+		ib.Bind();
 
 		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 		if (r > 1.0f)
@@ -209,7 +178,7 @@ int main(void)
 	}
 
 	//glDeleteProgram(shader);
-
+	}
 	glfwTerminate();
 	return 0;
 }
