@@ -9,6 +9,7 @@
 #include"Renderer.h"
 
 #include"VertexBuffer.h"
+#include"VertexBufferLayout.h"
 #include"IndexBuffer.h"
 #include"VertexArray.h"
 #include"Shader.h"
@@ -71,10 +72,11 @@ int main(void)
 	shader.SetUniform4f("u_Color", 0.08f, 0.03f, 0.08f, 1.0f);
 	
 	va.UnBind();
-	shader.UnBind();
-	
 	vb.UnBind();
 	ib.UnBind();
+	shader.UnBind();
+
+	Renderer renderer;
 
 	float r = 0.0f;
 	float increment = 0.05f;
@@ -82,15 +84,13 @@ int main(void)
 	while (!glfwWindowShouldClose(window))
 	{	//we are doing this every frame
 		/* Render here */
-		glClear(GL_COLOR_BUFFER_BIT);
+		
 		//code down
 		shader.Bind();
 		shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 		
-		va.Bind();
-		ib.Bind();
+		renderer.Draw(va, ib, shader);
 
-		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 		if (r > 1.0f)
 		{
 			increment = -0.05f;
