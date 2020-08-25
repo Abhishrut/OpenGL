@@ -20,6 +20,7 @@ public:
 	//set uniforms
 	void SetUniform4f(const std::string& name,float v0, float v1, float v3, float v4);
 	void SetUniform1f(const std::string& name, float value);
+	void SetUniform1i(const std::string& name, int value);
 private:
 	
 	unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
