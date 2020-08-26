@@ -1,6 +1,7 @@
 #pragma once
 #include<string>
 #include<unordered_map>
+#include<glm/glm.hpp>
 //hashmap or hashtable
 struct ShaderProgramSource {
 	std::string VertexSource;
@@ -18,6 +19,7 @@ public:
 	void Bind() const;
 	void UnBind() const;
 	//set uniforms
+	void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
 	void SetUniform4f(const std::string& name,float v0, float v1, float v3, float v4);
 	void SetUniform1f(const std::string& name, float value);
 	void SetUniform1i(const std::string& name, int value);
